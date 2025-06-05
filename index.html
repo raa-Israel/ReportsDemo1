@@ -1,27 +1,53 @@
-
 <!DOCTYPE html>
 <html lang="he">
 <head>
   <meta charset="UTF-8" />
-  <title>מפת ציוצים עם קישורים</title>
+  <title>מפת ציוצים עם שכבות</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     #map {
       height: 100vh;
       width: 100%;
     }
+    .popup-img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin-top: 6px;
+    }
   </style>
 </head>
 <body>
   <div id="map"></div>
-
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <script>
     const map = L.map('map').setView([31.9, 34.8], 8);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+    // בסיסים: רחובות ולוויין
+    const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
     }).addTo(map);
+
+    const satelliteLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenTopoMap contributors'
+    });
+
+    // שכבת ערים בעברית
+    const citiesHebrew = L.tileLayer.wms("https://ows.mundialis.de/services/service?", {
+      layers: 'TOPO-OSM-WMS',
+      format: 'image/png',
+      transparent: true,
+      attribution: '© Mundialis'
+    });
+
+    // שכבת כבישים ראשיים - כבישי תחבורה (מסגרת דמוית כבישים)
+    const roadsLayer = L.tileLayer('https://tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+      attribution: '© OSM HOT'
+    });
+
+    // שכבת ציוצים
+    const tweetLayer = L.layerGroup();
 
     fetch("tweets.json")
       .then(response => response.json())
@@ -34,14 +60,31 @@
             popupAnchor: [0, -40]
           });
 
-          const marker = L.marker([tweet.latitude, tweet.longitude], { icon }).addTo(map);
+          const marker = L.marker([tweet.latitude, tweet.longitude], { icon });
           marker.bindPopup(
             `<strong>${tweet.text}</strong><br>
-             <img src="${tweet.imageUrl}" width="200" /><br>
+             <img src="${tweet.imageUrl}" class="popup-img" /><br>
              <a href="${tweet.url}" target="_blank">לציוץ המקורי</a>`
           );
+          tweetLayer.addLayer(marker);
         });
+
+        tweetLayer.addTo(map);
       });
+
+    // שליטה בשכבות
+    const baseMaps = {
+      "מפת רחובות": streetLayer,
+      "מפת לוויין": satelliteLayer
+    };
+
+    const overlayMaps = {
+      "ציוצים": tweetLayer,
+      "שמות ערים (עברית)": citiesHebrew,
+      "כבישים ראשיים": roadsLayer
+    };
+
+    L.control.layers(baseMaps, overlayMaps).addTo(map);
   </script>
 </body>
 </html>

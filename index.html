@@ -3,7 +3,7 @@
 <html lang="he">
 <head>
   <meta charset="UTF-8" />
-  <title>מפת ציוצים - Leaflet עם JSON</title>
+  <title>מפת ציוצים עם קישורים</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     #map {
@@ -35,7 +35,11 @@
           });
 
           const marker = L.marker([tweet.latitude, tweet.longitude], { icon }).addTo(map);
-          marker.bindPopup(`<strong>${tweet.text}</strong><br><img src="${tweet.imageUrl}" width="200" />`);
+          marker.bindPopup(
+            `<strong>${tweet.text}</strong><br>
+             <img src="${tweet.imageUrl}" width="200" /><br>
+             <a href="${tweet.url}" target="_blank">לציוץ המקורי</a>`
+          );
         });
       });
   </script>

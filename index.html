@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="he">
 <head>
   <meta charset="UTF-8" />
-  <title>מפת ציוצים - Leaflet</title>
+  <title>מפת ציוצים - Leaflet עם JSON</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     #map {
@@ -16,25 +17,27 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const tweets = [{'id': '179832731', 'latitude': 32.0853, 'longitude': 34.7818, 'imageUrl': 'https://pbs.twimg.com/media/F8fKGHhW4AEjMvG?format=jpg&name=medium', 'text': 'שקיעה מהממת בתל אביב'}, {'id': '179832732', 'latitude': 31.7683, 'longitude': 35.2137, 'imageUrl': 'https://pbs.twimg.com/media/F8cYZqHX0AAwlZJ?format=jpg&name=medium', 'text': 'תצפית מהר הזיתים בירושלים'}];
-
     const map = L.map('map').setView([31.9, 34.8], 8);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    tweets.forEach(tweet => {
-      const icon = L.icon({
-        iconUrl: tweet.imageUrl,
-        iconSize: [40, 40],
-        iconAnchor: [20, 40],
-        popupAnchor: [0, -40]
-      });
+    fetch("tweets.json")
+      .then(response => response.json())
+      .then(tweets => {
+        tweets.forEach(tweet => {
+          const icon = L.icon({
+            iconUrl: tweet.imageUrl,
+            iconSize: [40, 40],
+            iconAnchor: [20, 40],
+            popupAnchor: [0, -40]
+          });
 
-      const marker = L.marker([tweet.latitude, tweet.longitude], { icon }).addTo(map);
-      marker.bindPopup(`<strong>${tweet.text}</strong><br><img src="${tweet.imageUrl}" width="200" />`);
-    });
+          const marker = L.marker([tweet.latitude, tweet.longitude], { icon }).addTo(map);
+          marker.bindPopup(`<strong>${tweet.text}</strong><br><img src="${tweet.imageUrl}" width="200" />`);
+        });
+      });
   </script>
 </body>
 </html>

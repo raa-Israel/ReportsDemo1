@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>מפת ציוצים עם סינון תאריך</title>
+  <title>מפת ציוצים מתקדמת</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     body { margin: 0; font-family: Arial, sans-serif; }
     #controls {
       position: absolute;
-      top: 10px;
-      right: 10px;
+      bottom: 10px;
+      left: 10px;
       z-index: 1000;
       background: white;
       padding: 8px;
@@ -19,9 +19,9 @@
     }
     #map { height: 100vh; width: 100vw; }
     .popup-img {
+      cursor: pointer;
       width: 100%;
       max-width: 400px;
-      height: auto;
       margin-top: 10px;
       border-radius: 8px;
     }
@@ -29,8 +29,23 @@
       font-size: 18px;
       margin-bottom: 6px;
     }
-    .leaflet-popup-content {
-      text-align: center;
+    .leaflet-popup-content { text-align: center; }
+
+    /* Fullscreen modal */
+    #imgModal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0; top: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+    }
+    #imgModal img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 10px;
     }
   </style>
 </head>
@@ -40,6 +55,9 @@
     <input type="date" id="dateFilter">
   </div>
   <div id="map"></div>
+  <div id="imgModal" onclick="this.style.display='none'">
+    <img id="modalImg" src="" alt="large view">
+  </div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     const map = L.map('map').setView([31.9, 34.8], 8);
@@ -48,12 +66,11 @@
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    const roadsLayer = L.tileLayer('https://tiles.wmflabs.org/hikebike/{z}/{x}/{y}.png', {
-      attribution: '© HikeBikeMap'
+    const roadsLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenTopoMap (CC-BY-SA)'
     });
 
     const tweetLayer = L.layerGroup().addTo(map);
-
     let allMarkers = [];
 
     fetch("tweets.json")
@@ -70,7 +87,7 @@
           const marker = L.marker([tweet.latitude, tweet.longitude], { icon });
           marker.bindPopup(
             `<div class="popup-text"><strong>${tweet.text}</strong></div>
-             <img src="${tweet.imageUrl}" class="popup-img" />
+             <img src="${tweet.imageUrl}" class="popup-img" onclick="showModal('${tweet.imageUrl}')"/>
              <div><a href="${tweet.url}" target="_blank">לציוץ המקורי</a></div>`
           );
           marker.date = tweet.date;
@@ -90,6 +107,11 @@
           tweetLayer.addLayer(marker);
         }
       });
+    }
+
+    function showModal(src) {
+      document.getElementById("modalImg").src = src;
+      document.getElementById("imgModal").style.display = "flex";
     }
 
     const baseMaps = { "מפת רחובות": streetLayer };

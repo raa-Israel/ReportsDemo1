@@ -1,13 +1,14 @@
+
 <!DOCTYPE html>
 <html lang="he">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>מפת דיווחי נזקים v1.0.4</title>
+  <title>מפת דיווחי נזקים v1.0.5 - מפת ציוצים עם טווח תאריכים בלבד</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    body {{ margin: 0; font-family: Arial, sans-serif; }}
-    #controls {{
+    body { margin: 0; font-family: Arial, sans-serif; }
+    #controls {
       position: absolute;
       bottom: 10px;
       left: 10px;
@@ -16,21 +17,21 @@
       padding: 8px;
       border-radius: 8px;
       box-shadow: 0 0 5px rgba(0,0,0,0.3);
-    }}
-    #map {{ height: 100vh; width: 100vw; }}
-    .popup-img {{
+    }
+    #map { height: 100vh; width: 100vw; }
+    .popup-img {
       cursor: pointer;
       width: 100%;
       max-width: 400px;
       margin-top: 10px;
       border-radius: 8px;
-    }}
-    .popup-text {{
+    }
+    .popup-text {
       font-size: 18px;
       margin-bottom: 6px;
-    }}
-    .leaflet-popup-content {{ text-align: center; }}
-    #imgModal {{
+    }
+    .leaflet-popup-content { text-align: center; }
+    #imgModal {
       display: none;
       position: fixed;
       z-index: 2000;
@@ -39,27 +40,15 @@
       background: rgba(0,0,0,0.8);
       justify-content: center;
       align-items: center;
-    }}
-    #imgModal img {{
+    }
+    #imgModal img {
       max-width: 90vw;
       max-height: 90vh;
       border-radius: 10px;
-    }}
-    #versionTag {{
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 1001;
-      background: rgba(255,255,255,0.9);
-      padding: 6px 12px;
-      font-size: 14px;
-      border-radius: 6px;
-      box-shadow: 0 0 3px rgba(0,0,0,0.2);
-    }}
+    }
   </style>
 </head>
 <body>
-  <div id="versionTag">גרסה: v1.0.4</div>
   <div id="controls">
     <label>מתאריך: <input type="date" id="fromDate"></label>
     <label>עד תאריך: <input type="date" id="toDate"></label>
@@ -71,9 +60,9 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     const map = L.map('map').setView([31.9, 34.8], 8);
-    const streetLayer = L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png').addTo(map);
-    const roadsTopo = L.tileLayer('https://{{s}}.tile.opentopomap.org/{{z}}/{{x}}/{{y}}.png');
-    const roadsCycling = L.tileLayer('https://tile.waymarkedtrails.org/cycling/{{z}}/{{x}}/{{y}}.png');
+    const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    const roadsTopo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png');
+    const roadsCycling = L.tileLayer('https://tile.waymarkedtrails.org/cycling/{z}/{x}/{y}.png');
 
     const tweetLayer = L.layerGroup().addTo(map);
     let allMarkers = [];
@@ -82,7 +71,13 @@
       .then(res => res.json())
       .then(tweets => {
         allMarkers = tweets.map(tweet => {
-          const icon = L.icon({ iconUrl: tweet.imageUrl, iconSize: [40, 40], iconAnchor: [20, 40], popupAnchor: [0, -40] });
+          const icon = L.icon({
+            iconUrl: tweet.imageUrl,
+            iconSize: [40, 40],
+            iconAnchor: [20, 40],
+            popupAnchor: [0, -40]
+          });
+
           const marker = L.marker([tweet.latitude, tweet.longitude], { icon });
           marker.bindPopup(
             `<div class="popup-text"><strong>${tweet.text}</strong></div>

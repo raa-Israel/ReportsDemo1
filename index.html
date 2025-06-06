@@ -1,29 +1,46 @@
 <!DOCTYPE html>
 <html lang="he">
 <head>
-  <meta charset="UTF-8" />
-  <title>מפת ציוצים עם תפריט וכבישים</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מפת ציוצים עם סינון תאריך</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    #map { height: 100vh; width: 100%; }
+    body { margin: 0; font-family: Arial, sans-serif; }
+    #controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+      background: white;
+      padding: 8px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    }
+    #map { height: 100vh; width: 100vw; }
     .popup-img {
-      max-width: 100%;
+      width: 100%;
+      max-width: 400px;
       height: auto;
-      display: block;
       margin-top: 10px;
       border-radius: 8px;
     }
     .popup-text {
       font-size: 18px;
-      font-family: Arial, sans-serif;
       margin-bottom: 6px;
+    }
+    .leaflet-popup-content {
+      text-align: center;
     }
   </style>
 </head>
 <body>
+  <div id="controls">
+    <label for="dateFilter">תאריך:</label>
+    <input type="date" id="dateFilter">
+  </div>
   <div id="map"></div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
   <script>
     const map = L.map('map').setView([31.9, 34.8], 8);
 
@@ -31,16 +48,18 @@
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    const roadsLayer = L.tileLayer('https://tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-      attribution: '© OSM HOT'
+    const roadsLayer = L.tileLayer('https://tiles.wmflabs.org/hikebike/{z}/{x}/{y}.png', {
+      attribution: '© HikeBikeMap'
     });
 
-    const tweetLayer = L.layerGroup();
+    const tweetLayer = L.layerGroup().addTo(map);
+
+    let allMarkers = [];
 
     fetch("tweets.json")
-      .then(response => response.json())
+      .then(res => res.json())
       .then(tweets => {
-        tweets.forEach(tweet => {
+        allMarkers = tweets.map(tweet => {
           const icon = L.icon({
             iconUrl: tweet.imageUrl,
             iconSize: [40, 40],
@@ -54,16 +73,26 @@
              <img src="${tweet.imageUrl}" class="popup-img" />
              <div><a href="${tweet.url}" target="_blank">לציוץ המקורי</a></div>`
           );
-          tweetLayer.addLayer(marker);
+          marker.date = tweet.date;
+          return marker;
         });
 
-        tweetLayer.addTo(map);
+        applyDateFilter();
       });
 
-    const baseMaps = {
-      "מפת רחובות": streetLayer
-    };
+    document.getElementById("dateFilter").addEventListener("change", applyDateFilter);
 
+    function applyDateFilter() {
+      const date = document.getElementById("dateFilter").value;
+      tweetLayer.clearLayers();
+      allMarkers.forEach(marker => {
+        if (!date || marker.date === date) {
+          tweetLayer.addLayer(marker);
+        }
+      });
+    }
+
+    const baseMaps = { "מפת רחובות": streetLayer };
     const overlayMaps = {
       "ציוצים": tweetLayer,
       "כבישים ראשיים": roadsLayer

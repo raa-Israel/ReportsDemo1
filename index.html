@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>מפת ציוצים v1.0.3</title>
+  <title>מפת דיווחי נזקים v1.0.3</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     body {{ margin: 0; font-family: Arial, sans-serif; }}
@@ -120,7 +120,7 @@
       "כבישים - טופוגרפיה": roadsTopo,
       "כבישים - מסלולי אופניים": roadsCycling
     };
-    L.control.layers(baseMaps, overlayMaps, {{ collapsed: false, position: 'topright' }}).addTo(map);
+    L.control.layers(baseMaps, overlayMaps, { collapsed: false, position: 'topright' }).addTo(map);
   </script>
 </body>
 </html>
